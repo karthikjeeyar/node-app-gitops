@@ -11,7 +11,7 @@ app:
 # ===========================================
 git:
   branch: main
-  repo: https://github.com/karthikjeeyar/node-app.git
+  repo: https://github.com/karthikjeeyar/nodejs-ex.git
   org: karthikjeeyar
   host: github.com
 
