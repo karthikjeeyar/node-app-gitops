@@ -6,6 +6,9 @@ metadata:
   labels:
     type: event-listener
     backstage.io/kubernetes-id: {{ .Values.app.name }}
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/instance: {{ .Values.app.name }}
+    app.kubernetes.io/component: event-listener
 spec:
   namespaceSelector: {}
   resources: {}

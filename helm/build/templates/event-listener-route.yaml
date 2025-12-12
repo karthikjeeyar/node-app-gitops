@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/managed-by: EventListener
     app.kubernetes.io/part-of: Triggers
     eventlistener: {{ .Values.app.name }}-el
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/instance: {{ .Values.app.name }}
+    app.kubernetes.io/component: route
 spec:
   to:
     kind: Service

@@ -6,6 +6,9 @@ metadata:
   labels:
     type: trigger-template
     backstage.io/kubernetes-id: {{ .Values.app.name }}
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/instance: {{ .Values.app.name }}
+    app.kubernetes.io/component: pipeline
 spec:
   params:
     - name: git-revision
