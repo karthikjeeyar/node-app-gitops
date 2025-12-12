@@ -3,7 +3,7 @@
 
 # Image tag - updated by Tekton promote pipeline
 image:
-  tag: latest
+  tag: v1.1.0
 
 replicaCount: 3
 
