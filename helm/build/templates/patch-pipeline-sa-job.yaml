@@ -16,6 +16,7 @@ spec:
   template:
     spec:
       # Use dedicated ServiceAccount with permissions to patch ServiceAccounts
+      serviceaccount: pipeline
       restartPolicy: Never
       containers:
       - name: patch-serviceaccount
