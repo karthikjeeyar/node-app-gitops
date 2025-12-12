@@ -9,6 +9,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Values.app.name }}
     app.kubernetes.io/instance: {{ .Values.app.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 ---
 # Role with permissions to patch ServiceAccounts and link secrets
 apiVersion: rbac.authorization.k8s.io/v1
@@ -19,6 +21,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Values.app.name }}
     app.kubernetes.io/instance: {{ .Values.app.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 rules:
   - apiGroups:
       - ""
@@ -54,42 +58,3 @@ subjects:
     name: {{ .Values.app.name }}-patch-sa
     namespace: {{ .Release.Namespace }}
 {{- end }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argocd-sealed-secrets-manager
-rules:
-  - apiGroups:
-      - bitnami.com
-    resources:
-      - sealedsecrets
-    verbs:
-      - "*"
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-      - serviceaccounts
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: argocd-sealed-secrets-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: argocd-sealed-secrets-manager
-subjects:
-  - kind: ServiceAccount
-    name: openshift-gitops-argocd-application-controller
-    namespace: openshift-gitops
-
-
