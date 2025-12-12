@@ -14,6 +14,7 @@ git:
   repo: https://github.com/karthikjeeyar/nodejs-ex.git
   org: karthikjeeyar
   host: github.com
+  name: nodejs-ex
 
 # ===========================================
 # ArgoCD Configuration

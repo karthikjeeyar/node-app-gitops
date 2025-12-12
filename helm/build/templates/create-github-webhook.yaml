@@ -51,7 +51,7 @@ spec:
               \"insecure_ssl\": \"1\"
             }
           }" \
-          "https://api.github.com/repos/$GIT_USERNAME/{{ .Values.git.name }}/hooks")
+          "https://api.github.com/repos/{{ .Values.git.org }}/{{ .Values.git.name }}/hooks")
         
         HTTP_STATUS=$(echo "$RESPONSE" | tail -1 | sed 's/HTTP_STATUS://')
         BODY=$(echo "$RESPONSE" | sed '$d')
