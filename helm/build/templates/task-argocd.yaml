@@ -91,10 +91,14 @@ spec:
               key: username
               optional: true
       script: |
-        
+        #!/bin/sh
+        set -e
+
         ENVIRON=$(params.environment)
         ARGOCD_USER=${ARGOCD_USERNAME:-admin}
         ARGOCD_SERVER="{{ .Values.argocd.server }}"
+      
+        echo $ARGOCD_SERVER
         
         echo "=== Logging into ArgoCD ==="
         argocd login --grpc-web --insecure  --username $ARGOCD_USER  --password $ARGOCD_PASSWORD  $ARGOCD_SERVER
