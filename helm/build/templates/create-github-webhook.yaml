@@ -17,12 +17,12 @@ spec:
           valueFrom:
             secretKeyRef:
               key: token
-              name: github-token
+              name: github-credentials
         - name: GIT_USERNAME
           valueFrom:
             secretKeyRef:
               key: username
-              name: github-token
+              name: github-credentials
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
       image: 'quay.io/openshift/origin-cli:latest'
