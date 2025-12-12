@@ -28,7 +28,7 @@ spec:
           params:
             - name: filter
               value: >-
-                body.ref == 'refs/heads/main' && 
+                body.ref in ['refs/heads/main', 'refs/heads/master'] && 
                 size(body.commits) > 0
       template:
         ref: {{ .Values.app.name }}-tt-build

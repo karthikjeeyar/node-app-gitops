@@ -6,9 +6,6 @@ kind: ServiceAccount
 metadata:
   name: {{ .Values.app.name }}-patch-sa
   namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}
-    app.kubernetes.io/instance: {{ .Values.app.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 ---
@@ -18,9 +15,6 @@ kind: Role
 metadata:
   name: {{ .Values.app.name }}-patch-sa-role
   namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}
-    app.kubernetes.io/instance: {{ .Values.app.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 rules:

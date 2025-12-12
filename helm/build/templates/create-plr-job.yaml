@@ -3,10 +3,6 @@ kind: Job
 metadata:
   name: {{ .Values.app.name }}-create-pipelinerun
   namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}
-    app.kubernetes.io/instance: {{ .Values.app.name }}
-    test: app
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-weight: "10"
