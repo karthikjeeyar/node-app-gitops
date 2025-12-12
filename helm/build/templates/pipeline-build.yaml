@@ -72,6 +72,31 @@ spec:
       workspaces:
         - name: source
           workspace: shared-data
+    # Also tag the image as 'latest' for convenience
+    - name: tag-as-latest
+      params:
+        - name: SOURCE_IMAGE_URL
+          value: 'docker://$(params.IMAGE):$(params.IMAGE_TAG)'
+        - name: DESTINATION_IMAGE_URL
+          value: 'docker://$(params.IMAGE):latest'
+        - name: SRC_TLS_VERIFY
+          value: 'false'
+        - name: DEST_TLS_VERIFY
+          value: 'false'
+      runAfter:
+        - build-and-push
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: skopeo-copy
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: images_url
+          workspace: shared-data
     - name: update-and-sync
       params:
         - name: appName
@@ -81,7 +106,7 @@ spec:
         - name: environment
           value: dev
       runAfter:
-        - build-and-push
+        - tag-as-latest
       taskRef:
         kind: Task
         name: {{ .Values.app.name }}-argocd-task
