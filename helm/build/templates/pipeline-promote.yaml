@@ -1,0 +1,74 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: {{ .Values.app.name }}-promote
+  namespace: {{ .Release.Namespace }}
+  labels:
+    backstage.io/kubernetes-id: {{ .Values.app.name }}
+    app.kubernetes.io/part-of: {{ .Values.app.name }}
+spec:
+  params:
+    - name: SOURCE_IMAGE_URL
+      description: Source image URL with tag (docker://registry/org/image:tag)
+      type: string
+    - name: DESTINATION_IMAGE_URL
+      description: Destination image URL with tag (docker://registry/org/image:tag)
+      type: string
+    - name: appName
+      description: ArgoCD application name to sync
+      type: string
+    - name: image-tag
+      description: Image tag for ArgoCD deployment
+      type: string
+    - name: environment
+      description: Target environment (staging or prod)
+      type: string
+      default: staging
+
+  workspaces:
+    - name: image-url
+      description: Workspace for skopeo operations
+
+  tasks:
+    - name: skopeo-copy
+      params:
+        - name: SOURCE_IMAGE_URL
+          value: $(params.SOURCE_IMAGE_URL)
+        - name: DESTINATION_IMAGE_URL
+          value: $(params.DESTINATION_IMAGE_URL)
+        - name: SRC_TLS_VERIFY
+          value: 'true'
+        - name: DEST_TLS_VERIFY
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: ARGS
+          value: ''
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: skopeo-copy
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: images_url
+          workspace: image-url
+
+    - name: update-and-sync
+      params:
+        - name: appName
+          value: $(params.appName)
+        - name: image-tag
+          value: $(params.image-tag)
+        - name: environment
+          value: $(params.environment)
+      runAfter:
+        - skopeo-copy
+      taskRef:
+        kind: Task
+        name: {{ .Values.app.name }}-argocd-task
+

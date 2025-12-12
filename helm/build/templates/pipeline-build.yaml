@@ -1,0 +1,89 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: {{ .Values.app.name }}-build
+  namespace: {{ .Release.Namespace }}
+  labels:
+    type: pipeline
+    backstage.io/kubernetes-id: {{ .Values.app.name }}
+spec:
+  params:
+    - name: git-url
+      description: Git repository URL
+      type: string
+      default: '{{ .Values.git.repo }}'
+    - name: git-revision
+      description: Git revision to build
+      type: string
+      default: '{{ .Values.git.branch }}'
+    - name: IMAGE
+      type: string
+    - name: IMAGE_TAG
+      type: string
+    - default: .
+      name: PATH_CONTEXT
+      type: string
+    - default: 20-minimal-ubi8
+      name: VERSION
+      type: string
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: URL
+          value: $(params.git-url)
+        - name: REVISION
+          value: $(params.git-revision)
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: shared-data
+    - name: build-and-push
+      params:
+        - name: IMAGE
+          value: '$(params.IMAGE):$(params.IMAGE_TAG)'
+        - name: TLS_VERIFY
+          value: 'false'
+        - name: CONTEXT
+          value: $(params.PATH_CONTEXT)
+        - name: VERSION
+          value: $(params.VERSION)
+      runAfter:
+        - fetch-repository
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: s2i-nodejs
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: shared-data
+    - name: deploy
+      params:
+        - name: SCRIPT
+          value: oc rollout status deploy/{{ .Values.app.name }}
+      runAfter:
+        - build-and-push
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+
+  workspaces:
+    - name: shared-data

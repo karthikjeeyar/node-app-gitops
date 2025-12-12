@@ -1,0 +1,89 @@
+# ===========================================
+# Application Configuration
+# ===========================================
+app:
+  name: node-app
+  namespace: node-app-dev
+  clusterDomain: apps.rosa.qbmnh-5fhim-ivg.1742.p3.openshiftapps.com
+
+# ===========================================
+# Git Repository Configuration
+# ===========================================
+git:
+  branch: main
+  repo: https://github.com/karthikjeeyar/node-app.git
+  org: karthikjeeyar
+  host: github.com
+
+# ===========================================
+# ArgoCD Configuration
+# ===========================================
+argocd:
+  server: openshift-gitops-server-openshift-gitops.apps.rosa.qbmnh-5fhim-ivg.1742.p3.openshiftapps.com
+  namespace: openshift-gitops
+
+# ===========================================
+# Image Registry Configuration
+# ===========================================
+image:
+  host: quay.io
+  organization: karthik_jk
+  name: demo-nodejs-ex
+  tag: latest
+
+# ===========================================
+# Sealed Secrets Configuration
+# ===========================================
+# All credentials are managed via Bitnami SealedSecrets.
+# 
+# HOW TO CONFIGURE:
+# 1. Install Sealed Secrets controller in your cluster
+# 2. Generate sealed secrets using the commands below
+# 3. Replace the placeholder values with your encrypted data
+# 4. Commit and push - ArgoCD will sync the secrets
+#
+# GENERATE REGISTRY SECRET:
+#   kubectl create secret docker-registry registry-creds \
+#     --docker-server=quay.io \
+#     --docker-username=YOUR_USER \
+#     --docker-password=YOUR_PASS \
+#     --dry-run=client -o yaml | kubeseal --format yaml
+#   # Copy the .dockerconfigjson value from spec.encryptedData
+#
+# GENERATE GIT SECRET:
+#   kubectl create secret generic git-creds \
+#     --from-literal=username=YOUR_USER \
+#     --from-literal=token=ghp_YOUR_TOKEN \
+#     --dry-run=client -o yaml | kubeseal --format yaml
+#   # Copy the username and token values from spec.encryptedData
+#
+# GENERATE ARGOCD SECRET:
+#   ARGOCD_PWD=$(kubectl get secret argocd-initial-admin-secret -n openshift-gitops -o jsonpath='{.data.password}' | base64 -d)
+#   kubectl create secret generic argocd-creds \
+#     --from-literal=username=admin \
+#     --from-literal=password=$ARGOCD_PWD \
+#     --dry-run=client -o yaml | kubeseal --format yaml
+#   # Copy the username and password values from spec.encryptedData
+# ===========================================
+sealedSecrets:
+  # Registry credentials (docker config json)
+  registry:
+    enabled: true
+    secretName: registry-credentials
+    encryptedData: "AgBeG+IuPQg4m9sk1ZE7v+uhV08dH5aFOQ8vKVlIKCJb2X4nQ29hk9fAz1hHUGfUF5htrzXqZTjOw6xoUuZ1/7IqEq68Nr6eeARd35G/iPzPyzJN+710eROJonbz17vnEd3y1Oa7Rhc2Q3qnXuL0LXGtRqUJ7oScfsEfC87M1I0LF6n+qIEldfJw5GlteEf4apfZEhYywCQgZZKS9eqgUtl9ATOYxpY/BInjhCrOKVgypzDdYcQbZUBv+Sz07B7isj5FwfwQmVr8A2quyLbl5Z8mE//e1hARBCLO6AaXv3vXXq/qd1B1sFeY7HtA0T+FXM5tD4F1bFFcKDXy+KZzDixSuiOY92pWhifUX5c8D+Pu805koDCh8iGvzIED6EbhdL6PBBhFhX7pO8/X4uvyROQGAn89oJAtTmgbtAbpgNLB2MhAbBy00oSzI0C7NbNszjQ/wmOB3RHAin7namsa1XzpbRDkgDJazfYrVMW3lSNpzrh2Vi+mGaRbeS05s+KB1XOFwazKNdL0GbDsax9j0IBIqCq75VgNXu3Jeug3wCorLciuXUcO5a0isdFAcCBvvZe7mkdbHhjPx9maJn/rFDy6HP0hkn9LrJpZmh5pIexqM1cFVNDR8srkwWgi4voVXIq1UcTFLvUakxF6QsddDb9gVy/45wDz00aQ7SlAZP3r9dRnVwOLb7GwNVTYG03Yikr+gRlTBA8TH7Cp91tXGMmOePaUXyw/kDHjG6nsIS8c//fXGdzGBCAQSi6NzIxlD5P70/2Kkvs7//cXtbUIFOBnD6u7tY8HJm10nR0WhLEZjhi81A3wyL2M7tGEGxJeYCG358AOp9PKTJqK+XwE5ee3Ag8sFPiM/8CdZtTdqbBIk+GPomfwSTvPm8VN3ufw/W88jPfgiCqKAwCWMN3s2CcY3OQybO01c/GuqZO4Wvys+QD+K9ced3fFpZKjv0rmVn1RCyoTdfHTpeT7xp2ewWOqFexot5kBvKgOBPFMZ6gmZ8PHQaU0sHm/upOy"
+
+  # Git credentials (username + token)
+  git:
+    enabled: true
+    secretName: git-credentials
+    encryptedData: |
+      username: AgDRkSuRc4YezNXxOKRsQX+0Y7u466yqSrnjT4eQ7WXe4NI91CNdKz51demzW2L3D0nsbnatiOLGjC441YK61Y3OaeFEwlElWths6HEmTB5QTR57suvsXiV+odYhyTvuJTPWYkrl7rEwNhKW7IzabBUXSvmtyktiPrwcJFslKtk6lOZIh1BhydLJeHr4xYTmbdnBLz2i4GEKu5DO7SNUY1nOBr6MYiM9DnTe0+w5Zq7K2XsrMqaHbxQWhllpSrV56qUlN3bdwOPmF/gyQuID1ZDAsUKadc6JvBuLc9TN+uGSNsBqebxENxrQEFrFuu4KH7LnJrhVubaHW75Vcv1/WyqCpygTNAHWFkFWpFZTbLydzVcjihWE0aRBBlAiMHYsOqf3LWbBlHygz2BqdYJj6DQDAezSSULEiCjv1AT+eTIto8PlWoM59q6ygOaslzUeLBhuilv0U94PMbVqaslM2+x2gYaPyjdHlI2ZkCQth7QGKzpHueGKumP+TaGuSUPAh8CFRRXtpREOLSyRigaAG6GrohRVpHdThmEtDKKUwRe5VdKh01vwLfSxZtASgBw5/BGYLfQieQp8v1Yx+A0hq90IqyopbKt7G4TCam4rrs5eoABfmT3zRS/WGenRbyd3rgwAOrnuXyquRimnuEQ2zmGSNzEYbs+v9LfowBV0vMEPYPdz3E/rIphCaEFx3U2+Gxy0CZ33ZoLbCGwY3N8t
+      token: AgDCfgUSmK7gXAh59uNu3wCiyiw8DFx12u1Ac7N2syyZ+pbciKeAAQeACHuX1sRg/99KPLRp5CQkVg3VCe6TVD7tnFz8OAtYcU3F6NFsbUgPKSrzwbgGgdxhmUk/gmOZLCIE/UNCD9oHfuMx2TokHbMSjhEf5sll8Axfq0EeaHOIKaK/O2dl9beB5lWsoXPb4oIDE4NnaCVzxVES9ayB5JZHjWmGGqWarpVQ2aBozhaTqqp9Eoz4yUqp8QqxDrrHO4xQ1Bx7m/w0HS/XMLyRM++CKjtPIO3yVVK3GP1fdlvTRjGhd0rw90En5nfJG0jIi4Fj6Q8yhb+jAo0fW69CHvdScSxTuFcF28CD7EB56hgsqFEHnn2K/90de1vFJNgcuHavzz1woDupp8es5OlZuOSHw/drY07VXSuz9j56jQhIPXkmfEUCO4E6uigK+mJBE1+PyvX9fplJbC2D2mq3N0aG2ejxSkYsZuNHpaoshUAi2JquqCOCuMBNFSBuKcDTPtpki9k6B2mN+P+jeAI4i49O2qdD9UtcPRttrDGzTBQr0GoZI3OZFe1I6eAjktJTteST9a6d7VSR4M1AXHEudBOoxmRyHiwd2xPMEGdkBVia8UMFbPFupGoZhOprTi/5Gp/tzESECLkqv/6RTXn8uP9oMD/pbCtS+CYDdWKKEvRPQg1KPe8QgEqwg26aAC4mDLdwP8X9NP/J5rfwhU94PuSSdHPfkR/dt5p2HtjQ6Xme8vT1hwNSGDcy
+
+  # ArgoCD credentials (username + password)
+  argocd:
+    enabled: true
+    secretName: argocd-credentials
+    encryptedData: |
+      username: AgDA+g5gaiBlJcyJAE/ljkKwL/iuILg6OahlOu4HKFreJPs3tZRAlKwuHnVua3+5axUYc3QLjAAAt+SENnSlqGH+ks2ftV/Tw1XFvn6WuqdXvApKalAOpsVkz+3GScxzxj5xBlsPydEaTN6CEPxcp9PlUHKvmYR1wHXMvmw0WUAhOOz5OukzTXP+An8djxAjzHfFCkz4uxhVoQiVeIyvp/OrG8eyITDoaT+JSe4bzm5fiZSQzol9ekErfVusv+5IMhtA8SUqpVcPMGIuhDkE93ASsnoivhW02TdHItWFFCuJqxDCyRY+KTwCVKotlvd005Z1e1FqVnpFDlIeMBtYe3ww7OPPmIOqzLbmmrk8yBVBFw9be60MgyyhR+EerX2duJv03IJdJP+PMUSG8TmQyJ3vFheO4Q1iONUh3ueyK+Axtj07sKoz6fF3hEJNCKzx3BuAovX9nanDAwLQEMFHkcni4TvyKbXfi4uvvJz6tgGyIuVgEoHxV4HmWvi42dRbFSJyryeW+PevgvwAF6PK8MhmGEpXmpVQa62/PdDfeNIiyaHinM/u6Z7u/Qm90M2RDaJUScNEbNy3j+VJw/e5kHsQop1ErHZ84COnDUAWcyHl2ZTGkMse6P9sEN1hl2JCJb3NHnQA7GP33iO61i2Osz/WbgqMZjy5luWD97KVAvtTnKFSsxrT6W9dj20b5f5+2ra5xYDP7g==
+      password: AgBmzQTRrPw/Cc7m5U1zylNTApgwDCt0cJqWpLmnVfekhJKrbszTUqu+2DQ46rtDyrhCBOgreNwSVucCGbXgeAQ4LoqOm7I/YV6rvF4uBNEYnNBTB9P80Sq7pHqMykJANU6iC7HKgZfKtwhAOdtF/ySDJAjGXoD3bj7/LFPxCaVNc9g2ZQYbyojnymHsq2YTvqhRlnwzvZjGv4NkuQJ3dZfuINxoJ1wNBe3dtRtQWLDVFbhDcogWB+T5VYtn/DP78mrdQHwpn23CBOzaOocsfZaswINZGGiIEmU5mYP/lQMIWm/gFMRqmO/edUgcudaDGCBzNEvnSKMtQnVLCFwAIXSI/ncB5Aoz582uJdqYnJ+U0iBRNZ+MWQ9Mqg7SB8JPbvUoL4vTSqbRjlMZlO9MvK6HRZ94Yqayri61w4gzTA8dTVIlkDfDhrLa6sup8NArsbCKSV7ecCdJPi4CuBvg/CHfEucliukLLuCOipy5Jyf0zGKlE1FvrfZ4fkIfFz5tP/Z4Fk1JC3ewwBV0Niz4bIeGNp8lZ0krY1eVGTmG0ikvBnQV4JEz1jS5fRzSYZxHxvVEWyINh66ArZ6HqE84MelGj2IEIDvvGeVfwSdEUFX4ydlitTxXWna+Xvfc+kCBankeH/GIRytuI4g3CNZGvaaX576/g0U8keUf7NpAoaVksp6UDw8N2eRj0GsI+d38nYM=

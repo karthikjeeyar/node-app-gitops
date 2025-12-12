@@ -1,0 +1,54 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: create-github-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    type: task
+    backstage.io/kubernetes-id: {{ .Values.app.name }}
+spec:
+  params:
+    - name: repo
+      type: string
+  steps:
+    - computeResources: {}
+      env:
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: github-token
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: github-token
+        - name: NAMESPACE
+          value: {{ .Release.Namespace }}
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: extract-route-and-create-webhook
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo "Extracting route..."
+        GIT_WEBHOOK_URL=$(oc get route webhook-{{ .Values.app.name }}-el -n $NAMESPACE -o jsonpath='{.spec.host}')
+        GIT_WEBHOOK_URL="http://${GIT_WEBHOOK_URL}"
+        echo "Webhook URL: $GIT_WEBHOOK_URL"
+
+        echo "Creating GitHub webhook..."
+        curl -v -X POST \
+          -u "$GIT_USERNAME:$GIT_TOKEN" \
+          -d "{
+            \"name\": \"web\",
+            \"active\": true,
+            \"events\": [\"*\"],
+            \"config\": {
+              \"url\": \"$GIT_WEBHOOK_URL\",
+              \"content_type\": \"json\",
+              \"insecure_ssl\": \"1\"
+            }
+          }" \
+          https://api.github.com/repos/$GIT_USERNAME/{{ .Values.git.name }}/hooks
+
+        echo "Webhook created successfully!"

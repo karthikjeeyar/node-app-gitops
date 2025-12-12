@@ -1,0 +1,44 @@
+{{- if or .Values.git.secretName (and .Values.sealedSecrets.enabled .Values.image.secretName) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.app.name }}-patch-pipeline-sa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/instance: {{ .Values.app.name }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-weight: "5"
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      # Use dedicated ServiceAccount with permissions to patch ServiceAccounts
+      serviceAccountName: {{ .Values.app.name }}-patch-sa
+      restartPolicy: Never
+      containers:
+      - name: patch-serviceaccount
+        image: quay.io/openshift/origin-cli:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Linking secrets to pipeline ServiceAccount in namespace {{ .Release.Namespace }}..."
+          
+          # Link git secret if configured
+          {{- if .Values.git.secretName }}
+          echo "Linking git secret: {{ .Values.git.secretName }}"
+          oc secrets link pipeline {{ .Values.git.secretName }} --for=mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.git.secretName }} may already be linked"
+          {{- end }}
+          
+          # Link image secret for both pull and mount if Sealed Secrets enabled
+          {{- if and .Values.sealedSecrets.enabled .Values.image.secretName }}
+          echo "Linking image secret: {{ .Values.image.secretName }}"
+          oc secrets link pipeline {{ .Values.image.secretName }} --for=pull,mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.image.secretName }} may already be linked"
+          {{- end }}
+          
+          echo "ServiceAccount secrets linked successfully"
+{{- end }}
+
