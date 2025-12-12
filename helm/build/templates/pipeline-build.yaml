@@ -72,21 +72,19 @@ spec:
       workspaces:
         - name: source
           workspace: shared-data
-    - name: deploy
+    - name: update-and-sync
       params:
-        - name: SCRIPT
-          value: oc rollout status deploy/{{ .Values.app.name }}
+        - name: appName
+          value: {{ .Values.app.name }}-dev
+        - name: image-tag
+          value: $(params.IMAGE_TAG)
+        - name: environment
+          value: dev
       runAfter:
         - build-and-push
       taskRef:
-        params:
-          - name: kind
-            value: task
-          - name: name
-            value: openshift-client
-          - name: namespace
-            value: openshift-pipelines
-        resolver: cluster
+        kind: Task
+        name: {{ .Values.app.name }}-argocd-task
 
   workspaces:
     - name: shared-data

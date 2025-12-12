@@ -48,11 +48,21 @@ spec:
         
         # Determine values file based on environment
         ENVIRON=$(params.environment)
-        if [ "$ENVIRON" = "staging" ]; then
-          FILE="Values-staging.yaml"
-        else
-          FILE="Values-prod.yaml"
-        fi
+        case "$ENVIRON" in
+          dev)
+            FILE="Values.yaml"
+            ;;
+          staging)
+            FILE="Values-staging.yaml"
+            ;;
+          prod)
+            FILE="Values-prod.yaml"
+            ;;
+          *)
+            echo "Unknown environment: $ENVIRON"
+            exit 1
+            ;;
+        esac
         
         echo "=== Updating $FILE with image tag: $(params.image-tag) ==="
         
@@ -70,7 +80,7 @@ spec:
         
         echo "=== Committing Changes ==="
         git add .
-        git commit -m "🚀 Promote to $ENVIRON: image tag $(params.image-tag)" || echo "No changes to commit"
+        git commit -m "🚀 Deploy to $ENVIRON: image tag $(params.image-tag)" || echo "No changes to commit"
         git push
         
         echo "=== GitOps Update Complete ==="
@@ -97,7 +107,7 @@ spec:
         ENVIRON=$(params.environment)
         ARGOCD_USER=${ARGOCD_USERNAME:-admin}
         ARGOCD_SERVER="{{ .Values.argocd.server }}"
-      
+
         echo $ARGOCD_SERVER
         
         echo "=== Logging into ArgoCD ==="
