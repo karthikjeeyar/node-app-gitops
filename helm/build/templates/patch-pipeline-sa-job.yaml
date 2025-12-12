@@ -16,7 +16,6 @@ spec:
   template:
     spec:
       # Use dedicated ServiceAccount with permissions to patch ServiceAccounts
-      serviceAccountName: {{ .Values.app.name }}-patch-sa
       restartPolicy: Never
       containers:
       - name: patch-serviceaccount
