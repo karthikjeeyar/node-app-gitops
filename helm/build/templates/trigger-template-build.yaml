@@ -38,7 +38,7 @@ spec:
       spec:
         params:
           - name: git-url
-            value: $(tt.params.git-repo-url)
+            value: {{ .Values.git.repo }}
           - name: git-revision
             value: $(tt.params.git-revision)
           - name: IMAGE
