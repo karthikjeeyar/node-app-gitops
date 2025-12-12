@@ -1,4 +1,4 @@
-{{- if and .Values.sealedSecrets.enabled .Values.image.secretName }}
+{{- if or .Values.sealedSecrets.git.enabled .Values.sealedSecrets.registry.enabled }}
 ---
 # ServiceAccount for the patch job with permissions to update ServiceAccounts
 apiVersion: v1
