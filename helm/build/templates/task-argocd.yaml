@@ -100,6 +100,7 @@ spec:
         
         echo "=== Logging into ArgoCD ==="
         argocd login --grpc-web \
+           --skip-test-tls --insecure \
           --username $ARGOCD_USER \
           --password $ARGOCD_PASSWORD \
           $ARGOCD_SERVER
