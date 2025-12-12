@@ -1,4 +1,4 @@
-{{- if or .Values.git.secretName (and .Values.sealedSecrets.enabled .Values.image.secretName) }}
+{{- if or .Values.sealedSecrets.git.enabled .Values.sealedSecrets.registry.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -28,15 +28,15 @@ spec:
           echo "Linking secrets to pipeline ServiceAccount in namespace {{ .Release.Namespace }}..."
           
           # Link git secret if configured
-          {{- if .Values.git.secretName }}
-          echo "Linking git secret: {{ .Values.git.secretName }}"
-          oc secrets link pipeline {{ .Values.git.secretName }} --for=mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.git.secretName }} may already be linked"
+          {{- if .Values.sealedSecrets.git.enabled }}
+          echo "Linking git secret: {{ .Values.sealedSecrets.git.secretName }}"
+          oc secrets link pipeline {{ .Values.sealedSecrets.git.secretName }} --for=mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.sealedSecrets.git.secretName }} may already be linked"
           {{- end }}
           
-          # Link image secret for both pull and mount if Sealed Secrets enabled
-          {{- if and .Values.sealedSecrets.enabled .Values.image.secretName }}
-          echo "Linking image secret: {{ .Values.image.secretName }}"
-          oc secrets link pipeline {{ .Values.image.secretName }} --for=pull,mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.image.secretName }} may already be linked"
+          # Link registry secret for both pull and mount if enabled
+          {{- if .Values.sealedSecrets.registry.enabled }}
+          echo "Linking registry secret: {{ .Values.sealedSecrets.registry.secretName }}"
+          oc secrets link pipeline {{ .Values.sealedSecrets.registry.secretName }} --for=pull,mount -n {{ .Release.Namespace }} || echo "Secret {{ .Values.sealedSecrets.registry.secretName }} may already be linked"
           {{- end }}
           
           echo "ServiceAccount secrets linked successfully"
