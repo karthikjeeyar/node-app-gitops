@@ -4,9 +4,6 @@ kind: Job
 metadata:
   name: {{ .Values.app.name }}-patch-pipeline-sa
   namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.app.name }}
-    app.kubernetes.io/instance: {{ .Values.app.name }}
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-weight: "5"
